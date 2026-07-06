@@ -1,6 +1,5 @@
-import 'dart:typed_data';
 import 'dart:math';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
@@ -19,9 +18,9 @@ class Recognizer {
       _interpreter = await Interpreter.fromAsset('assets/mobilefacenet.tflite');
 
       _isModelLoaded = true;
-      print("✅ Face model loaded successfully");
+      debugPrint("✅ Face model loaded successfully");
     } catch (e) {
-      print("❌ Model load error: $e");
+      debugPrint("❌ Model load error: $e");
     }
   }
 
@@ -73,9 +72,9 @@ class Recognizer {
           final pixel = image.getPixel(x, y);
 
           return [
-            (pixel.r - 127.5) / 128.0,
-            (pixel.g - 127.5) / 128.0,
-            (pixel.b - 127.5) / 128.0,
+            (img.getRed(pixel) - 127.5) / 128.0,
+            (img.getGreen(pixel) - 127.5) / 128.0,
+            (img.getBlue(pixel) - 127.5) / 128.0,
           ];
         }),
       ),

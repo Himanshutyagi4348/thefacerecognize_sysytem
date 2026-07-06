@@ -19,7 +19,6 @@ class FrameProcessor {
   /// =========================
   Future<Uint8List?> processFrame(CameraImage image) async {
     final now = DateTime.now();
-
     /// FPS throttling (VERY IMPORTANT)
     if (_lastProcessTime != null) {
       final diff = now.difference(_lastProcessTime!).inMilliseconds;

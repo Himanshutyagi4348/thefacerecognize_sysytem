@@ -17,8 +17,8 @@ class AppConstants {
   // =========================
   // RECOGNITION THRESHOLDS
   // =========================
-  static const double matchThreshold = 0.35; // lower = stricter matching
-  static const double unknownThreshold = 0.45;
+  static const double matchThreshold = 0.85; // cosine similarity threshold
+  static const double unknownThreshold = 0.55;
 
   // =========================
   // REGISTRATION SETTINGS

@@ -8,8 +8,6 @@ import '../../camera/frame_processor.dart';
 import '../../camera/camera_service.dart';
 import '../../ml/detection/face_detection_service.dart';
 import '../../ml/recognition/face_engine.dart';
-import '../../core/enums/face_mode.dart' hide FaceMode;
-import '../../core/state/face_state.dart';
 
 class RegistrationController extends ChangeNotifier {
   /// =========================
@@ -75,6 +73,7 @@ class RegistrationController extends ChangeNotifier {
       }
 
       final result = await FaceEngine.instance.processFrame(
+        cameraImage: frame,
         inputImage: inputImage,
         faces: faces,
         name: name,

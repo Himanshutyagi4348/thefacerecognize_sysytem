@@ -1,6 +1,7 @@
 // embedings_utils.dart
 // (You already have this file — move your existing content here.)
-import 'dart:math' as Math;
+import 'dart:math' as math;
+
 class EmbeddingUtils {
   EmbeddingUtils._();
 
@@ -82,6 +83,5 @@ class EmbeddingUtils {
 }
 
 extension _Sqrt on double {
-  double sqrt() => Math.sqrt(this);
+  double sqrt() => math.sqrt(this);
 }
-

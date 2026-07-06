@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/projects/face_recognition/windows/flutter"
+    "cmake.sourceDirectory": "C:/projects/face_recognition/windows/flutter",
+    "dart.projectSearchDepth": 3
 }
