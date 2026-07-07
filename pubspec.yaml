@@ -72,7 +72,7 @@ flutter:
 
   # Application assets
   assets:
-    - assets/mobilefacenet.tflite
+    - assets/
     - images/
 
   # To add assets to your application, add an assets section, like this:

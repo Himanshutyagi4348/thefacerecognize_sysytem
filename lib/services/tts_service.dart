@@ -1,105 +1,119 @@
+import 'dart:async';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../constants.dart';
 
 class TTSService {
-  TTSService._();
-
-  static final TTSService instance = TTSService._();
+  static final TTSService instance = TTSService._internal();
 
   final FlutterTts _tts = FlutterTts();
-
   bool _isInitialized = false;
-  bool _isSpeaking = false;
 
-  /// =========================
+  DateTime? _lastSpokenTime;
+
+  TTSService._internal();
+
+  /// ===============================================================
   /// INIT TTS
-  /// =========================
+  /// ===============================================================
   Future<void> init() async {
     if (_isInitialized) return;
 
+    kDebugLog('TTSService: Initializing text-to-speech engine');
     await _tts.setLanguage("en-US");
     await _tts.setSpeechRate(0.45);
-    await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
-
-    _tts.setStartHandler(() {
-      _isSpeaking = true;
-    });
-
-    _tts.setCompletionHandler(() {
-      _isSpeaking = false;
-    });
-
-    _tts.setErrorHandler((msg) {
-      _isSpeaking = false;
-    });
+    await _tts.setVolume(1.0);
 
     _isInitialized = true;
+    kDebugLog('TTSService: Initialization complete');
   }
 
-  /// =========================
-  /// SPEAK TEXT
-  /// =========================
+  /// ===============================================================
+  /// SPEAK (SAFE WITH COOLDOWN)
+  /// ===============================================================
   Future<void> speak(String text) async {
-    if (!_isInitialized) await init();
+    await init();
 
-    if (_isSpeaking) {
-      await stop();
-    }
+    kDebugLog('TTSService: speak() called with text="$text"');
 
+    if (_shouldSkip()) return;
+
+    _lastSpokenTime = DateTime.now();
+
+    await _tts.stop();
     await _tts.speak(text);
   }
 
-  /// =========================
-  /// QUEUE SAFE SPEAK (no overlap)
-  /// =========================
-  Future<void> speakSafe(String text) async {
-    if (!_isInitialized) await init();
-
-    if (_isSpeaking) return;
-
-    await _tts.speak(text);
-  }
-
-  /// =========================
+  /// ===============================================================
   /// STOP SPEECH
-  /// =========================
+  /// ===============================================================
   Future<void> stop() async {
     await _tts.stop();
-    _isSpeaking = false;
   }
 
-  /// =========================
-  /// GUIDED FACE INSTRUCTIONS
-  /// =========================
-  Future<void> guideFacePosition(String position) async {
-    switch (position.toLowerCase()) {
+  /// ===============================================================
+  /// VERIFICATION SPEECH HELPERS
+  /// ===============================================================
+
+  Future<void> speakWelcome(String name) async {
+    await speak("Welcome $name. Access granted.");
+  }
+
+  Future<void> speakUnknown() async {
+    await speak("Face not recognized. Please try again.");
+  }
+
+  Future<void> speakAccessDenied() async {
+    await speak("Access denied. Face not recognized.");
+  }
+
+  Future<void> speakRegisterStart() async {
+    await speak("Starting registration. Please follow face directions.");
+  }
+
+  Future<void> speakPoseInstruction(String pose) async {
+    switch (pose) {
+      case "front":
+        await speak("Look straight at the camera.");
+        break;
       case "left":
-        await speak("Please move your face to the left");
+        await speak("Turn your face to the left.");
         break;
       case "right":
-        await speak("Please move your face to the right");
+        await speak("Turn your face to the right.");
         break;
-      case "top":
-        await speak("Please move your face slightly up");
+      case "up":
+        await speak("Look slightly upward.");
         break;
-      case "bottom":
-        await speak("Please move your face slightly down");
-        break;
-      case "front":
-        await speak("Please look straight at the camera");
-        break;
-      case "blink":
-        await speak("Please blink your eyes now");
+      case "down":
+        await speak("Look slightly downward.");
         break;
       default:
-        await speak(position);
+        await speak("Please adjust your face position.");
     }
   }
 
-  /// =========================
-  /// STATUS ANNOUNCEMENT
-  /// =========================
-  Future<void> announceStatus(String status) async {
-    await speakSafe(status);
+  Future<void> speakError() async {
+    await speak("Something went wrong. Please try again.");
+  }
+
+  /// ===============================================================
+  /// COOLDOWN LOGIC
+  /// ===============================================================
+  bool _shouldSkip() {
+    if (_lastSpokenTime == null) return false;
+
+    final diff = DateTime.now().difference(_lastSpokenTime!);
+    final skip = diff < kVoiceCooldown;
+    kDebugLog('TTSService: _shouldSkip=$skip (diff=${diff.inMilliseconds}ms)');
+
+    return skip;
+  }
+
+  /// ===============================================================
+  /// DISPOSE
+  /// ===============================================================
+  Future<void> dispose() async {
+    await _tts.stop();
   }
 }
